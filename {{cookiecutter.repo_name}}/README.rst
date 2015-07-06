@@ -34,12 +34,16 @@ DJANGO_EMAIL_SUBJECT_PREFIX             EMAIL_SUBJECT_PREFIX        n/a         
 
 The following table lists settings and their defaults for third-party applications:
 
+{% if cookiecutter.use_aws_s3 == 'y' -%}
 ======================================= =========================== ============================================== ======================================================================
 Environment Variable                    Django Setting              Development Default                            Production Default
 ======================================= =========================== ============================================== ======================================================================
 DJANGO_AWS_ACCESS_KEY_ID                AWS_ACCESS_KEY_ID           n/a                                            raises error
 DJANGO_AWS_SECRET_ACCESS_KEY            AWS_SECRET_ACCESS_KEY       n/a                                            raises error
-DJANGO_AWS_STORAGE_BUCKET_NAME          AWS_STORAGE_BUCKET_NAME     n/a                                            raises error
+DJANGO_AWS_STORAGE_BUCKET_NAME          AWS_STORAGE_BUCKET_NAME     n/a                                            raises error{%- else %}
+======================================= =========================== ============================================== ======================================================================
+Environment Variable                    Django Setting              Development Default                            Production Default
+======================================= =========================== ============================================== ======================================================================{%- endif %}
 DJANGO_MAILGUN_API_KEY                  MAILGUN_ACCESS_KEY          n/a                                            raises error
 DJANGO_MAILGUN_SERVER_NAME              MAILGUN_SERVER_NAME         n/a                                            raises error
 ======================================= =========================== ============================================== ======================================================================
@@ -131,14 +135,16 @@ Run these commands to deploy the project to Heroku:
 
     heroku addons:create mailgun
     heroku addons:create memcachier:dev
-
+    
     heroku config:set DJANGO_SECRET_KEY=RANDOM_SECRET_KEY_HERE
     heroku config:set DJANGO_SETTINGS_MODULE='config.settings.production'
-
+    {% if cookiecutter.use_aws_s3 == 'y' -%}
+    
     heroku config:set DJANGO_AWS_ACCESS_KEY_ID=YOUR_AWS_ID_HERE
     heroku config:set DJANGO_AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_ACCESS_KEY_HERE
     heroku config:set DJANGO_AWS_STORAGE_BUCKET_NAME=YOUR_AWS_S3_BUCKET_NAME_HERE
 
+    {%- endif %}
     heroku config:set DJANGO_MAILGUN_SERVER_NAME=YOUR_MALGUN_SERVER
 
     git push heroku master
@@ -177,13 +183,16 @@ You can then deploy by running the following commands.
     ssh -t dokku@yourservername.com dokku memcached:link {{cookiecutter.repo_name}}-memcached {{cookiecutter.repo_name}}
     ssh -t dokku@yourservername.com dokku postgres:create {{cookiecutter.repo_name}}-postgres
     ssh -t dokku@yourservername.com dokku postgres:link {{cookiecutter.repo_name}}-postgres {{cookiecutter.repo_name}}
+
     ssh -t dokku@yourservername.com dokku config:set {{cookiecutter.repo_name}} DJANGO_SECRET_KEY=RANDOM_SECRET_KEY_HERE
     ssh -t dokku@yourservername.com dokku config:set {{cookiecutter.repo_name}} DJANGO_SETTINGS_MODULE='config.settings.production'
-    ssh -t dokku@yourservername.com dokku config:set {{cookiecutter.repo_name}} DJANGO_AWS_ACCESS_KEY_ID=YOUR_AWS_ID_HERE
+    {% if cookiecutter.use_aws_s3 == 'y' -%}ssh -t dokku@yourservername.com dokku config:set {{cookiecutter.repo_name}} DJANGO_AWS_ACCESS_KEY_ID=YOUR_AWS_ID_HERE
     ssh -t dokku@yourservername.com dokku config:set {{cookiecutter.repo_name}} DJANGO_AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_ACCESS_KEY_HERE
     ssh -t dokku@yourservername.com dokku config:set {{cookiecutter.repo_name}} DJANGO_AWS_STORAGE_BUCKET_NAME=YOUR_AWS_S3_BUCKET_NAME_HERE
+    ssh -t dokku@yourservername.com dokku config:set {{cookiecutter.repo_name}} DJANGO_AWS_STORAGE_BUCKET_NAME=YOUR_AWS_S3_BUCKET_NAME_HERE{%- endif %}
     ssh -t dokku@yourservername.com dokku config:set {{cookiecutter.repo_name}} DJANGO_MAILGUN_API_KEY=YOUR_MAILGUN_API_KEY
     ssh -t dokku@yourservername.com dokku config:set {{cookiecutter.repo_name}} DJANGO_MAILGUN_SERVER_NAME=YOUR_MAILGUN_SERVER
+    
     ssh -t dokku@yourservername.com dokku run {{cookiecutter.repo_name}} python manage.py migrate
     ssh -t dokku@yourservername.com dokku run {{cookiecutter.repo_name}} python manage.py createsuperuser
 

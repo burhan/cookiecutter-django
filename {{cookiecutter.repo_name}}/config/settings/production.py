@@ -10,7 +10,9 @@ Production Configurations
 from __future__ import absolute_import, unicode_literals
 
 
+{% if cookiecutter.use_aws_s3 == 'y' -%}
 from boto.s3.connection import OrdinaryCallingFormat
+{%-endif %}
 from django.utils import six
 
 from .common import *  # noqa
@@ -61,6 +63,7 @@ INSTALLED_APPS += ("gunicorn", )
 INSTALLED_APPS += (
     'storages',
 )
+{% if cookiecutter.use_aws_s3 == 'y' -%}
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 AWS_ACCESS_KEY_ID = env('DJANGO_AWS_ACCESS_KEY_ID')
@@ -69,7 +72,7 @@ AWS_STORAGE_BUCKET_NAME = env('DJANGO_AWS_STORAGE_BUCKET_NAME')
 AWS_AUTO_CREATE_BUCKET = True
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_CALLING_FORMAT = OrdinaryCallingFormat()
-
+AWS_PRELOAD_METADATA = True
 # AWS cache settings, don't change unless you know what you're doing:
 AWS_EXPIRY = 60 * 60 * 24 * 7
 
@@ -83,6 +86,10 @@ AWS_HEADERS = {
 
 # URL that handles the media served from MEDIA_ROOT, used for managing stored files.
 MEDIA_URL = 'https://s3.amazonaws.com/%s/' % AWS_STORAGE_BUCKET_NAME
+{%- else %}
+DEFAULT_FILE_STORAGE = 'storages.backends.OverwriteStorage'
+MEDIA_URL = {{cookiecutter.media_url}}
+{%- endif %}
 
 # Static Assests
 # ------------------------
@@ -94,7 +101,7 @@ STATIC_URL = MEDIA_URL
 
 # See: https://github.com/antonagestam/collectfast
 # For Django 1.7+, 'collectfast' should come before 'django.contrib.staticfiles'
-AWS_PRELOAD_METADATA = True
+
 INSTALLED_APPS = ('collectfast', ) + INSTALLED_APPS
 {%- endif %}
 

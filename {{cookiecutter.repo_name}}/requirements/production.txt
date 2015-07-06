@@ -9,7 +9,9 @@ gunicorn==19.3.0
 
 # Static and Media Storage
 # ------------------------------------------------
+{% if cookiecutter.use_aws_s3 == 'y' -%}
 boto==2.38.0
+{%- endif %}
 django-storages-redux==1.2.3
 {% if cookiecutter.use_whitenoise != 'y' -%}
 Collectfast==0.2.3

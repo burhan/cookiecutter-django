@@ -10,5 +10,7 @@
     "now": "2015/01/13",
     "year": "{{ cookiecutter.now[:4] }}",
     "use_whitenoise": "y",
-    "windows": "n"
+    "windows": "n",
+    "use_aws_s3": "n",
+    "media_url": ""
 }
